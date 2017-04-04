@@ -5,6 +5,9 @@
 %% item variation settings
 -export([add_variation/3, get_variation/3, update_variation/4,
          remove_variation/3, list_variations/2]).
+%% item price settings
+-export([add_price/4, get_price/4, update_price/5, remove_price/4,
+         list_prices/3]).
 
 %%--------------------------------------------------------------------
 %% item methods
@@ -49,7 +52,7 @@ list_items(Conn) ->
 %%--------------------------------------------------------------------
 
 add_variation(Conn, ItemName, Variation) ->
-    Query = "INSERT INTO product_variation VALUES ($1, $2, $3)",
+    Query = "INSERT INTO product_variation VALUES ($1, $2, $3, $4)",
     case epgsql:equery(Conn, Query, [ItemName|variation_list(Variation)]) of
         {error, {error, error, _Pid, foreign_key_violation, _Msg, _Opts}} ->
             {error, no_such_product};
@@ -82,9 +85,49 @@ list_variations(Conn, ItemName) ->
         {ok, _Rows, Cols} -> {ok, lists:map(fun build_variation/1, Cols)}
     end.
 
+%%--------------------------------------------------------------------
+%% price methods
+%%--------------------------------------------------------------------
+
+add_price(Conn, ItemName, VariationName, Price) ->
+    Query = "INSERT INTO product_price VALUES ($1, $2, $3, $4)",
+    Args = [ItemName, VariationName|price_list(Price)],
+    case epgsql:equery(Conn, Query, Args) of
+        {error, {error, error, _Pid, foreign_key_violation, _Msg, _Opts}} ->
+            {error, no_variation};
+        {ok, _N} -> ok
+    end.
+
+get_price(Conn, ItemName, Variation, Type) ->
+    Query = "SELECT * FROM product_price
+             WHERE product_name=$1 AND variation=$2 AND price_type=$3",
+    case epgsql:equery(Conn, Query, [ItemName, Variation, Type]) of
+        {ok, _Cols, []} -> {error, no_price};
+        {ok, _Cols, [Row]} -> {ok, build_price(Row)}
+    end.
+
+update_price(Conn, ItemName, Variation, Type, Price) ->
+    ok = remove_price(Conn, ItemName, Variation, Type),
+    add_price(Conn, ItemName, Variation, Price).
+
+remove_price(Conn, ItemName, Variation, Type) ->
+    Query = "DELETE FROM product_price
+             WHERE product_name=$1 AND variation=$2 AND price_type = $3",
+    case epgsql:equery(Conn, Query, [ItemName, Variation, Type]) of
+        {ok, 1} -> ok;
+        {ok, 0} -> {error, no_price}
+    end.
+
+list_prices(Conn, ItemName, Variation) ->
+    Query = "SELECT * FROM product_price
+             WHERE product_name=$1 AND product_variation=$2",
+    case epgsql:equery(Conn, Query, [ItemName, Variation]) of
+        {ok, _Rows, Cols} -> {ok, lists:map(fun build_price/1, Cols)}
+    end.
+
 
 %%====================================================================
-%% Internal functions
+%% Internal function
 %%====================================================================
 
 build_item({Name, Type, Brand, Description}) ->
@@ -95,8 +138,15 @@ item_list(#{name := Name, type := Type, brand := Brand,
             description := Description}) ->
     [Name, Type, Brand, Description].
 
-build_variation({Product, Variation, Cost}) ->
-    #{product => Product, variation => Variation, cost => Cost}.
+build_variation({Product, Variation, Cost, Count}) ->
+    #{product => Product, variation => Variation, cost => Cost,
+     count => Count}.
 
-variation_list(#{variation := Variation, cost := Cost}) ->
-    [Variation, Cost].
+variation_list(#{variation := Variation, cost := Cost, count := Count}) ->
+    [Variation, Cost, Count].
+
+build_price({Type, Price}) ->
+    #{type => Type, price => Price}.
+
+price_list(#{type := Type, price := Price}) ->
+    [Type, Price].

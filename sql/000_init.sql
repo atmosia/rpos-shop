@@ -19,6 +19,7 @@ CREATE TABLE product_variation (
     product_name VARCHAR(255) NOT NULL,
     variation VARCHAR(255) NOT NULL,
     cost INTEGER NOT NULL,
+    count INTEGER NOT NULL,
 
     FOREIGN KEY (product_name) REFERENCES product(name),
     PRIMARY KEY (product_name, variation)
@@ -29,7 +30,6 @@ CREATE TABLE product_price (
     variation VARCHAR(255) NOT NULL,
     price_type VARCHAR(255) NOT NULL,
     price INTEGER NOT NULL,
-    count INTEGER NOT NULL,
 
     FOREIGN KEY (product_name, variation)
         REFERENCES product_variation(product_name, variation),

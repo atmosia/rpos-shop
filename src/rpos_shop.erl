@@ -9,8 +9,10 @@
 
 -export([build_item/4, add_item/1, get_item/1, update_item/2, remove_item/1,
          list_items/0]).
--export([build_variation/2, add_variation/2, get_variation/2,
+-export([build_variation/3, add_variation/2, get_variation/2,
          update_variation/3, remove_variation/2, list_variations/1]).
+-export([build_price/2, add_price/3, get_price/3, update_price/4,
+         remove_price/3, list_prices/2]).
 
 %% Application callbacks
 -export([start/2, stop/1]).
@@ -43,7 +45,8 @@ remove_item(Name) ->
 list_items() ->
     rpos_item_server:list_items(item_pid()).
 
-build_variation(Name, Cost) -> #{variation => Name, cost => Cost}.
+build_variation(Name, Cost, Count) ->
+    #{variation => Name, cost => Cost, count => Count}.
 
 add_variation(ItemName, Variation) ->
     rpos_item_server:add_variation(item_pid(), ItemName, Variation).
@@ -59,6 +62,29 @@ remove_variation(ItemName, Name) ->
 
 list_variations(ItemName) ->
     rpos_item_server:list_variations(item_pid(), ItemName).
+
+build_price(Type, Price) ->
+    #{type => Type, price => Price}.
+
+add_price(ItemName, Variation, Price) ->
+    rpos_item_server:add_price(item_pid(), ItemName, Variation, Price).
+
+get_price(ItemName, Variation, PriceType) ->
+    rpos_item_server:get_price(item_pid(), ItemName, Variation, PriceType).
+
+update_price(ItemName, Variation, PriceType, Price) ->
+    rpos_item_server:update_price(item_pid(), ItemName, Variation, PriceType,
+                                  Price).
+
+remove_price(ItemName, Variation, PriceType) ->
+    rpos_item_server:remove_price(item_pid(), ItemName, Variation, PriceType).
+
+list_prices(ItemName, Variation) ->
+    rpos_item_server:list_prices(item_pid(), ItemName, Variation).
+
+%%====================================================================
+%% Application callbacks
+%%====================================================================
 
 start(_StartType, _StartArgs) ->
     Config = read_config(?CONFIG_PATH),
