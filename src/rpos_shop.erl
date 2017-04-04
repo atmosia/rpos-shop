@@ -7,8 +7,10 @@
 
 -behaviour(application).
 
--export([build_item/6, add_item/2, get_item/1, update_item/3, remove_item/2]).
--export([list_items/0]).
+-export([build_item/4, add_item/1, get_item/1, update_item/2, remove_item/1,
+         list_items/0]).
+-export([build_variation/2, add_variation/2, get_variation/2,
+         update_variation/3, remove_variation/2, list_variations/1]).
 
 %% Application callbacks
 -export([start/2, stop/1]).
@@ -22,24 +24,41 @@
 %% API
 %%====================================================================
 
-build_item(Name, Cost, Price, Type, Brand, Description) ->
-    #item{name=Name, cost=Cost, price=Price, type=Type, brand=Brand,
-          description=Description}.
+build_item(Name, Type, Brand, Description) ->
+    #{name => Name, type => Type, brand => Brand,
+      description => Description}.
 
-add_item(Item, Author) ->
-    rpos_item_server:add_item(item_pid(), Item, Author).
+add_item(Item) ->
+    rpos_item_server:add_item(item_pid(), Item).
 
 get_item(Item) ->
     rpos_item_server:get_item(item_pid(), Item).
 
-update_item(Name, Item, Author) ->
-    rpos_item_server:update_item(item_pid(), Name, Item, Author).
+update_item(Name, Item) ->
+    rpos_item_server:update_item(item_pid(), Name, Item).
 
-remove_item(Name, Author) ->
-    rpos_item_server:remove_item(item_pid(), Name, Author).
+remove_item(Name) ->
+    rpos_item_server:remove_item(item_pid(), Name).
 
 list_items() ->
     rpos_item_server:list_items(item_pid()).
+
+build_variation(Name, Cost) -> #{name => Name, cost => Cost}.
+
+add_variation(ItemName, Variation) ->
+    rpos_item_server:add_variation(item_pid(), ItemName, Variation).
+
+get_variation(ItemName, Name) ->
+    rpos_item_server:get_variation(item_pid(), ItemName, Name).
+
+update_variation(ItemName, Name, Variation) ->
+    rpos_item_server:update_variation(item_pid(), ItemName, Name, Variation).
+
+remove_variation(ItemName, Name) ->
+    rpos_item_server:remove_variation(item_pid(), ItemName, Name).
+
+list_variations(ItemName) ->
+    rpos_item_server:list_variations(item_pid(), ItemName).
 
 start(_StartType, _StartArgs) ->
     Config = read_config(?CONFIG_PATH),

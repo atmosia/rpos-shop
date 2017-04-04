@@ -3,33 +3,36 @@ CREATE TABLE product_type (
 );
 
 CREATE TABLE product (
-    name VARCHAR(255) NOT NULL,
-    cost INTEGER NOT NULL,
-    price INTEGER NOT NULL,
+    name VARCHAR(255) NOT NULL PRIMARY KEY,
     type VARCHAR(255) NOT NULL,
     brand VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    deleted BOOLEAN NOT NULL DEFAULT 'f',
-    created_by VARCHAR(255) NOT NULL,
-    deleted_by VARCHAR(255),
-    created_on TIMESTAMP DEFAULT NOW() NOT NULL,
-    deleted_on TIMESTAMP,
 
-    PRIMARY KEY (name, created_on),
-    FOREIGN KEY (type) REFERENCES product_type(name),
-    CHECK (created_on < deleted_on)
+    FOREIGN KEY (type) REFERENCES product_type(name)
 );
 
-CREATE TABLE product_count (
-    name VARCHAR(255) PRIMARY KEY NOT NULL,
-    count INTEGER NOT NULL
+CREATE TABLE price_type (
+    name VARCHAR(255) PRIMARY KEY
 );
 
-CREATE TABLE product_count_log (
-    name VARCHAR(255) NOT NULL,
+CREATE TABLE product_variation (
+    product_name VARCHAR(255) NOT NULL,
+    variation VARCHAR(255) NOT NULL,
+    cost INTEGER NOT NULL,
+
+    FOREIGN KEY (product_name) REFERENCES product(name),
+    PRIMARY KEY (product_name, variation)
+);
+
+CREATE TABLE product_price (
+    product_name VARCHAR(255) NOT NULL,
+    variation VARCHAR(255) NOT NULL,
+    price_type VARCHAR(255) NOT NULL,
+    price INTEGER NOT NULL,
     count INTEGER NOT NULL,
-    updated_by VARCHAR(255) NOT NULL,
-    updated_on TIMESTAMP DEFAULT NOW() NOT NULL,
 
-    PRIMARY KEY (name, updated_by, updated_on)
+    FOREIGN KEY (product_name, variation)
+        REFERENCES product_variation(product_name, variation),
+    FOREIGN KEY (price_type) REFERENCES price_type(name),
+    PRIMARY KEY (product_name, variation, price_type)
 );
