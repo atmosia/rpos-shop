@@ -43,7 +43,7 @@ remove_item(Name) ->
 list_items() ->
     rpos_item_server:list_items(item_pid()).
 
-build_variation(Name, Cost) -> #{name => Name, cost => Cost}.
+build_variation(Name, Cost) -> #{variation => Name, cost => Cost}.
 
 add_variation(ItemName, Variation) ->
     rpos_item_server:add_variation(item_pid(), ItemName, Variation).

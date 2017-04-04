@@ -12,7 +12,7 @@
 
 add_item(Conn, Item) ->
     Query = "INSERT INTO
-                product(name, cost, price, type, brand, description)
+                product(name, type, brand, description)
             VALUES ($1, $2, $3, $4)",
     case epgsql:equery(Conn, Query, item_list(Item)) of
         {error, {error, error, _Pid, foreign_key_violation, _Msg, _Opts}} ->
